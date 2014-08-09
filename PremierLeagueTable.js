@@ -1,29 +1,29 @@
-var team = {};
-team['Arsenal'] = "é˜¿æ£®çº³";
-team['Aston Villa'] = "é˜¿æ–¯é¡¿ç»´æ‹‰";
-team['Burnley'] = "ä¼¯æ©åˆ©";
-team['Chelsea'] = "åˆ‡å°”è¥¿";
-team['Crystal Palace'] = "æ°´æ™¶å®«";
-team['Everton'] = "åŸƒå¼—é¡¿";
-team['Hull City'] = "èµ«å°”åŸ";
-team['Leicester City'] = "è±æ–¯ç‰¹åŸ";
-team['Liverpool'] = "åˆ©ç‰©æµ¦";
-team['Manchester City'] = "æ›¼åŸ";
-team['Manchester United'] = "æ›¼è”";
-team['Newcastle United'] = "çº½å¡æ–¯å°”";
-team['Queens Park Rangers'] = "å…¬å›­æµæµªè€…";
-team['Southampton'] = "å—å®‰æ™®é¡¿";
-team['Stoke City'] = "æ–¯æ‰˜å…‹åŸ";
-team['Sunderland'] = "æ¡‘å¾·å…°";
-team['Swansea City'] = "æ–¯æ—ºè¥¿";
-team['Tottenham Hotspur'] = "çƒ­åˆº";
-team['West Bromwich Albion'] = "è¥¿å¸ƒæœ—";
-team['West Ham United'] = "è¥¿æ±‰å§†è”";
+var teams = {};
+teams['Arsenal'] = "°¢É­ÄÉ";
+teams['Aston Villa'] = "°¢Ë¹¶ÙÎ¬À­";
+teams['Burnley'] = "²®¶÷Àû";
+teams['Chelsea'] = "ÇĞ¶ûÎ÷";
+teams['Crystal Palace'] = "Ë®¾§¹¬";
+teams['Everton'] = "°£¸¥¶Ù";
+teams['Hull City'] = "ºÕ¶û³Ç";
+teams['Leicester City'] = "À³Ë¹ÌØ³Ç";
+teams['Liverpool'] = "ÀûÎïÆÖ";
+teams['Manchester City'] = "Âü³Ç";
+teams['Manchester United'] = "ÂüÁª";
+teams['Newcastle United'] = "Å¦¿¨Ë¹¶û";
+teams['Queens Park Rangers'] = "Å®Íõ¹«Ô°Á÷ÀËÕß";
+teams['Southampton'] = "ÄÏ°²ÆÕ¶Ù";
+teams['Stoke City'] = "Ë¹ÍĞ¿Ë³Ç";
+teams['Sunderland'] = "É£µÂÀ¼";
+teams['Swansea City'] = "Ë¹ÍúÎ÷";
+teams['Tottenham Hotspur'] = "ÈÈ´Ì";
+teams['West Bromwich Albion'] = "Î÷²¼ÀÊ";
+teams['West Ham United'] = "Î÷ººÄ·Áª";
 
 //Season 2013-2014
-team['Norwich City'] = "è¯ºç»´å¥‡";
-team['Fulham'] = "å¯Œå‹’å§†";
-team['Cardiff City'] = "åŠ è¿ªå¤«åŸ";
+teams['Norwich City'] = "ÅµÎ¬Ææ";
+teams['Fulham'] = "¸»ÀÕÄ·";
+teams['Cardiff City'] = "¼ÓµÏ·ò³Ç";
 
 function TeamRecord() {
     this.rank = "";
@@ -51,10 +51,10 @@ function TeamRecord() {
     this.awayGoalsAgainst = "";
 }
 
-function RenderingRule(name, width, left) {
+function RenderingRule(name, width, pendAction) {
     this.name = name;
     this.width = width;
-    this.left = left;
+    this.pendAction = pendAction;
 }
 
 function XMLHTTPResponse(url,type) {
@@ -68,14 +68,14 @@ function XMLHTTPResponse(url,type) {
     xmlhttp.open("get",url,false);
     xmlhttp.send(null);
     if(xmlhttp.readyState==4) {
-        //4ä»£è¡¨æˆåŠŸè¿”å›æ•°æ®
-        var result= xmlhttp.responseText;//å¾—åˆ°æœåŠ¡å™¨è¿”å›çš„æ•°æ®
+        //4´ú±í³É¹¦·µ»ØÊı¾İ
+        var result= xmlhttp.responseText;//µÃµ½·şÎñÆ÷·µ»ØµÄÊı¾İ
         return result;
     }
 }
 
 
-function GetSection(htmlString,secName) {
+function getSection(htmlString,secName) {
     var startExp = "<"+secName+"([^>]*)>"
     var endExp =  "</"+secName+"([^>]*)>"
     var start = new RegExp(startExp);
@@ -90,7 +90,7 @@ function GetSection(htmlString,secName) {
 }
 
 
-function GetSections(htmlString,secName) {
+function getSections(htmlString,secName) {
     var StringArray = new Array();
 
     var startExp = "<"+secName+"([^>]*)>"
@@ -114,7 +114,7 @@ function GetSections(htmlString,secName) {
     return StringArray;
 }
 
-function PeelSections(htmlString,secName) {
+function peelSections(htmlString,secName) {
     var startExp = "<"+secName+"([^>]*)>"
     var endExp =  "</"+secName+"([^>]*)>"
     var start = new RegExp(startExp);
@@ -139,8 +139,8 @@ function formatNumber(number, length, right) {
 
 function parseFromESPNHtml(url) {
     var resource = XMLHTTPResponse(url,0);
-    var board = GetSection(resource,"tbody");
-    var teamArray = GetSections(board,"tr");
+    var board = getSection(resource,"tbody");
+    var teamArray = getSections(board,"tr");
 
     //0   1    2 3   4  5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23
     //pos,team,s,pts,gd,s,0,0,0,0,0, 0, s, 0, 0, 0, 0, 0, s, 0, 0, 0, 0, 0
@@ -153,19 +153,19 @@ function parseFromESPNHtml(url) {
          FTerm.CurrentWindow.SendConvertedData("=====================\x0d");
          */
 
-        var details = GetSections(PeelSections(teamArray[i].replace(/&nbsp;/g, ""), "a"), "td");
+        var details = getSections(peelSections(teamArray[i].replace(/&nbsp;/g, ""), "a"), "td");
         var teamRecord = new TeamRecord();
         teamRecord.rank = details[0];
-        teamRecord.team = details[1];
+        teamRecord.team = teams[details[1]];
         teamRecord.points = details[3];
         teamRecord.goalsDiff = details[4];
         teamRecord.played = details[6];
 
-        teamRecord.allWins = details[6];
-        teamRecord.allDraws = details[7];
-        teamRecord.allLosts = details[8];
-        teamRecord.allGoalsFor = details[9];
-        teamRecord.allGoalsAgainst = details[10];
+        teamRecord.allWins = details[7];
+        teamRecord.allDraws = details[8];
+        teamRecord.allLosts = details[9];
+        teamRecord.allGoalsFor = details[10];
+        teamRecord.allGoalsAgainst = details[11];
 
         teamRecord.homeWins = details[13];
         teamRecord.homeDraws = details[14];
@@ -185,111 +185,119 @@ function parseFromESPNHtml(url) {
     return teamRecords;
 }
 
-function render(teamRecords, renderingRulues) {
-    for (var teamRecord in teamRecords) {
-        var line = "";
-        for (var renderingRule in renderingRulues) {
-            line += formatNumber(teamRecord[renderingRule.name], renderingRule.width, renderingRule.left);
-        }
-    }
+function prepend(str) {
+    return " " + str;
 }
 
-var resource = XMLHTTPResponse("http://www.espnfc.com/barclays-premier-league/23/table",0);
-// var resource = XMLHTTPResponse("http://www.espnfc.com/barclays-premier-league/23/table?season=2013",0);
-var board = GetSection(resource,"tbody");
-if(board != "") {
-    var teamArray = GetSections(board,"tr");
-    var title = "\x1b\x1b[4m\x1b\x1b[44;1;37mè‹±æ ¼å…°è¶³çƒè¶…çº§è”èµ›           åˆè®¡              \x1b\x1b[4m\x1b\x1b[41;37m      ä¸»åœº       \x1b\x1b[4m\x1b\x1b[46;37m      å®¢åœº            \x1b\x1b[m\x0d" +
-        "\x1b\x1b[4m\x1b\x1b[1;44;37mæ’å çƒé˜Ÿ       ç§¯åˆ† å‡€èƒœ   èµ› èƒœ å¹³ è´Ÿ è¿› å¤±  \x1b\x1b[4m\x1b\x1b[41;37m èƒœ å¹³ è´Ÿ è¿› å¤±  \x1b\x1b[4m\x1b\x1b[46;37m èƒœ å¹³ è´Ÿ è¿› å¤± \x1b\x1b[m\x0d";
-    FTerm.CurrentWindow.SendConvertedData(title);
+function append(str) {
+    return str + " ";
+}
 
-    //0   1    2 3   4  5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23
-    //pos,team,s,pts,gd,s,0,0,0,0,0, 0, s, 0, 0, 0, 0, 0, s, 0, 0, 0, 0, 0
-    var bigGoals = false;
-    var detailsArray = new Array();
-    for (i=1; i<teamArray.length; i++) {
-        /*
-         FTerm.CurrentWindow.SendConvertedData("=====================\x0d");
-         FTerm.CurrentWindow.SendConvertedData(teamArray[i]);
-         FTerm.CurrentWindow.SendConvertedData("\x0d");
-         FTerm.CurrentWindow.SendConvertedData("=====================\x0d");
-         */
-
-        var details = GetSections(PeelSections(teamArray[i].replace(/&nbsp;/g, ""), "a"), "td");
-        detailsArray.push(details);
-        if (details[10] >= 100) {
-            bigGoals = true;
-        }
+function fixStringLength(str, length, pendAction) {
+    if (str == null || str == undefined) {
+        str = "";
     }
-
-    for (i=0; i<detailsArray.length; i++){
-        var details = detailsArray[i];
-
-        var light = "";
-        if (details[0] <= 3) {
-            light = "\x1b\x1b[1;31m";
-        } else if (details[0] <= 4) {
-            light = "\x1b\x1b[1;35m";
-        } else if (details[0] <= 5) {
-            light = "\x1b\x1b[1;36m";
-        } else if (details[0] <= 17) {
-            light = "\x1b\x1b[1m";
+    var witdh = 0;
+    for (var i = 0; i < str.length; i++) {
+        var charWitdh;
+        if (str.charCodeAt(i) >= 0 && str.charCodeAt(i) < 256) {
+            charWitdh = 1;
         } else {
-            light = "\x1b\x1b[1;33m";
+            charWitdh = 2;
+        }
+        if (witdh + charWitdh > length) {
+            str = str.substring(0, i);
+            break;
         }
 
-        FTerm.CurrentWindow.SendConvertedData(light);
-
-
-        var line = "";
-        //Rank
-        line += formatNumber(details[0], 3, true);
-
-        //Team
-        var teamname = team[details[1]];
-        line += " "+teamname;
-        for(span=teamname.length*2;span<11;span++) {
-            line += " ";
-        }
-
-        //PTS
-        line += formatNumber(details[3], 4);
-        //GD
-        line += formatNumber(details[4], 5);
-        line += "  ";
-
-        //Details
-        //All
-        line += " ";
-        for (var j=6; j<=9; j++) {
-            line += formatNumber(details[j], 3);
-        }
-        line += formatNumber(details[10], bigGoals ? 4 : 3);
-        line += formatNumber(details[11], 3);
-        if (!bigGoals) {
-            line += " ";
-        }
-
-        //Home
-        line += " ";
-        for (var j=13; j<=17; j++) {
-            line += formatNumber(details[j], 3);
-        }
-        line += " ";
-
-        //Away
-        line += " ";
-        for (var j=19; j<=23; j++) {
-            line += formatNumber(details[j], 3);
-        }
-
-        line += "\x1b\x1b[m\x0d";
-        FTerm.CurrentWindow.SendConvertedData(line);
+        witdh += charWitdh;
     }
-    var about = "\x0d" +
-        "\x1b\x1b[1mæ³¨ï¼š\x1b\x1b[31må† å†›è”èµ›    1 2 3   \x1b\x1b[m\x0d" +
-        "\x1b\x1b[1;31m    \x1b\x1b[35må† å†›è”èµ›èµ„æ ¼èµ›  4   \x1b\x1b[m\x0d" +
-        "\x1b\x1b[1;35m    \x1b\x1b[36mæ¬§ç½—å·´è”èµ›      5   \x1b\x1b[m\x0d" +
-        "\x1b\x1b[1;36m    \x1b\x1b[33mé™çº§åŒº   18 19 20 \x1b\x1b[m\x0d";
-    FTerm.CurrentWindow.SendConvertedData(about);
+
+    while (witdh ++ < length) {
+        str = pendAction(str);
+    }
+
+    return str;
 }
+
+function renderTeamColor(rank) {
+    var light = "";
+    if (rank <= 3) {
+        light = "\x1b\x1b[1;31m";
+    } else if (rank <= 4) {
+        light = "\x1b\x1b[1;35m";
+    } else if (rank <= 5) {
+        light = "\x1b\x1b[1;36m";
+    } else if (rank <= 17) {
+        light = "\x1b\x1b[1m";
+    } else {
+        light = "\x1b\x1b[1;33m";
+    }
+
+    FTerm.CurrentWindow.SendData(light);
+}
+
+function render(teamRecords, renderingRules) {
+    var title = "\x1b\x1b[4m\x1b\x1b[44;1;37mÓ¢¸ñÀ¼×ãÇò³¬¼¶ÁªÈü           ºÏ¼Æ              \x1b\x1b[4m\x1b\x1b[41;37m      Ö÷³¡       \x1b\x1b[4m\x1b\x1b[46;37m      ¿Í³¡      \x1b\x1b[m\x0d" +
+        "\x1b\x1b[4m\x1b\x1b[1;44;37mÅÅÃû Çò¶Ó        »ı·Ö ¾»Ê¤  Èü Ê¤ Æ½ ¸º ½ø Ê§  \x1b\x1b[4m\x1b\x1b[41;37m Ê¤ Æ½ ¸º ½ø Ê§  \x1b\x1b[4m\x1b\x1b[46;37m Ê¤ Æ½ ¸º ½ø Ê§ \x1b\x1b[m\x0d";
+    FTerm.CurrentWindow.SendData(title);
+    for (var j = 0; j < teamRecords.length; j++) {
+        var teamRecord = teamRecords[j];
+        renderTeamColor(teamRecord.rank);
+        var line = "";
+        for (var i = 0; i < renderingRules.length; i++) {
+            var renderingRule = renderingRules[i];
+            line += fixStringLength(teamRecord[renderingRule.name], renderingRule.width, renderingRule.pendAction);
+        }
+        line += "\x1b\x1b[m\x0d";
+        FTerm.CurrentWindow.SendData(line);
+    }
+
+//    var about = "\x0d" +
+//        "\x1b\x1b[1m×¢£º\x1b\x1b[31m¹Ú¾üÁªÈü    1 2 3   \x1b\x1b[m\x0d" +
+//        "\x1b\x1b[1;31m    \x1b\x1b[35m¹Ú¾üÁªÈü×Ê¸ñÈü  4   \x1b\x1b[m\x0d" +
+//        "\x1b\x1b[1;35m    \x1b\x1b[36mÅ·ÂŞ°ÍÁªÈü      5   \x1b\x1b[m\x0d" +
+//        "\x1b\x1b[1;36m    \x1b\x1b[33m½µ¼¶Çø   18 19 20 \x1b\x1b[m\x0d";
+//    FTerm.CurrentWindow.SendConvertedData(about);
+}
+
+var url = "http://www.espnfc.com/barclays-premier-league/23/table";
+//var url = "http://www.espnfc.com/barclays-premier-league/23/table?season=2013";
+var teamRecords = parseFromESPNHtml(url);
+
+var bigGoals = false;
+for (var i = 0; i < teamRecords.length; i++) {
+    var teamRecord = teamRecords[i];
+    if (teamRecord.allGoalsFor >= 100) {
+        bigGoals = true;
+        break;
+    }
+}
+
+var renderingRules = [
+    new RenderingRule("rank", 3, append),
+    new RenderingRule("team", 14, append),
+    new RenderingRule("points", 3, prepend),
+    new RenderingRule("goalsDiff", 5, prepend),
+
+    new RenderingRule("played", 5, prepend),
+    new RenderingRule("allWins", 3, prepend),
+    new RenderingRule("allDraws", 3, prepend),
+    new RenderingRule("allLosts", 3, prepend),
+    new RenderingRule("allGoalsFor", bigGoals ? 4 : 3, prepend),
+    new RenderingRule("allGoalsAgainst", 3, prepend),
+
+    new RenderingRule("homeWins", bigGoals ? 4 : 5, prepend),
+    new RenderingRule("homeDraws", 3, prepend),
+    new RenderingRule("homeLosts", 3, prepend),
+    new RenderingRule("homeGoalsFor", 3, prepend),
+    new RenderingRule("homeGoalsAgainst", 3, prepend),
+
+    new RenderingRule("awayWins", 5, prepend),
+    new RenderingRule("awayDraws", 3, prepend),
+    new RenderingRule("awayLosts", 3, prepend),
+    new RenderingRule("awayGoalsFor", 3, prepend),
+    new RenderingRule("awayGoalsAgainst", 3, prepend)
+];
+
+render(teamRecords, renderingRules);

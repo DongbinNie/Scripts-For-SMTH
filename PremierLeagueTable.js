@@ -91,7 +91,7 @@ function getSection(htmlString,secName) {
 
 
 function getSections(htmlString,secName) {
-    var StringArray = new Array();
+    var StringArray = [];
 
     var startExp = "<"+secName+"([^>]*)>"
     var endExp =  "</"+secName+"([^>]*)>"
@@ -137,13 +137,56 @@ function formatNumber(number, length, right) {
     return num;
 }
 
+function trim(x) {
+    return x.replace(/^\s+|\s+$/g,'');
+}
+
 function parseFromESPNHtml(url) {
     var resource = XMLHTTPResponse(url,0);
     var board = getSection(resource,"tbody");
     var teamArray = getSections(board,"tr");
 
-    //0   1    2 3   4  5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23
-    //pos,team,s,pts,gd,s,0,0,0,0,0, 0, s, 0, 0, 0, 0, 0, s, 0, 0, 0, 0, 0
+    //2014-08-24
+    /*
+    <tr style="background-color: #81D6AC">
+     0    <td class="pos">1</td>
+     1    <td class="team">
+            <a href="http://www.espnfc.com/club/tottenham-hotspur/367/index">Tottenham Hotspur</a>
+          </td>
+
+     2    <td headers="colA" class="space">&nbsp;</td>
+     3    <td class="groupA" headers="colA">2</td>
+     4    <td class="groupA" headers="colA">2</td>
+     5    <td class="groupA" headers="colA">0</td>
+     6    <td class="groupA" headers="colA">0</td>
+     7    <td class="groupA" headers="colA">5</td>
+     8    <td class="groupA" headers="colA">0</td>
+
+        
+
+     9            <td headers="colB" class="space">&nbsp;</td>
+    10            <td class="groupB" headers="colB">1</td>
+    11            <td class="groupB" headers="colB">0</td>
+    12            <td class="groupB" headers="colB">0</td>
+    13            <td class="groupB" headers="colB">4</td>
+    14            <td class="groupB" headers="colB">0</td>
+
+    15            <td headers="colC" class="space">&nbsp;</td>
+    16            <td headers="colC">1</td>
+    17            <td headers="colC">0</td>
+    18            <td headers="colC">0</td>
+    19            <td headers="colC">1</td>
+    20            <td headers="colC">0</td>
+        
+            
+         
+
+    21    <td class="space">&nbsp;</td>
+    22    <td class="gd">5</td>
+    23    <td class="pts">6</td>
+
+    </tr>
+    */
     var teamRecords = [];
     for (i=1; i<teamArray.length; i++) {
         /*
@@ -156,28 +199,28 @@ function parseFromESPNHtml(url) {
         var details = getSections(peelSections(teamArray[i].replace(/&nbsp;/g, ""), "a"), "td");
         var teamRecord = new TeamRecord();
         teamRecord.rank = details[0];
-        teamRecord.team = teams[details[1]];
-        teamRecord.points = details[3];
-        teamRecord.goalsDiff = details[4];
-        teamRecord.played = details[6];
+        teamRecord.team = teams[trim(details[1])];
+        teamRecord.points = details[23];
+        teamRecord.goalsDiff = details[22];
+        teamRecord.played = details[3];
 
-        teamRecord.allWins = details[7];
-        teamRecord.allDraws = details[8];
-        teamRecord.allLosts = details[9];
-        teamRecord.allGoalsFor = details[10];
-        teamRecord.allGoalsAgainst = details[11];
+        teamRecord.allWins = details[4];
+        teamRecord.allDraws = details[5];
+        teamRecord.allLosts = details[6];
+        teamRecord.allGoalsFor = details[7];
+        teamRecord.allGoalsAgainst = details[8];
 
-        teamRecord.homeWins = details[13];
-        teamRecord.homeDraws = details[14];
-        teamRecord.homeLosts = details[15];
-        teamRecord.homeGoalsFor = details[16];
-        teamRecord.homeGoalsAgainst = details[17];
+        teamRecord.homeWins = details[10];
+        teamRecord.homeDraws = details[11];
+        teamRecord.homeLosts = details[12];
+        teamRecord.homeGoalsFor = details[13];
+        teamRecord.homeGoalsAgainst = details[14];
 
-        teamRecord.awayWins = details[19];
-        teamRecord.awayDraws = details[20];
-        teamRecord.awayLosts = details[21];
-        teamRecord.awayGoalsFor = details[22];
-        teamRecord.awayGoalsAgainst = details[23];
+        teamRecord.awayWins = details[16];
+        teamRecord.awayDraws = details[17];
+        teamRecord.awayLosts = details[18];
+        teamRecord.awayGoalsFor = details[19];
+        teamRecord.awayGoalsAgainst = details[20];
 
         teamRecords.push(teamRecord);
     }

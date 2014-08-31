@@ -296,12 +296,12 @@ function render(teamRecords, renderingRules) {
         FTerm.CurrentWindow.SendData(line);
     }
 
-//    var about = "\x0d" +
-//        "\x1b\x1b[1m注：\x1b\x1b[31m冠军联赛    1 2 3   \x1b\x1b[m\x0d" +
-//        "\x1b\x1b[1;31m    \x1b\x1b[35m冠军联赛资格赛  4   \x1b\x1b[m\x0d" +
-//        "\x1b\x1b[1;35m    \x1b\x1b[36m欧罗巴联赛      5   \x1b\x1b[m\x0d" +
-//        "\x1b\x1b[1;36m    \x1b\x1b[33m降级区   18 19 20 \x1b\x1b[m\x0d";
-//    FTerm.CurrentWindow.SendConvertedData(about);
+    var about = "\x0d" +
+        "\x1b\x1b[1m注：\x1b\x1b[31m冠军联赛    1 2 3   \x1b\x1b[m\x0d" +
+        "\x1b\x1b[1;31m    \x1b\x1b[35m冠军联赛资格赛  4   \x1b\x1b[m\x0d" +
+        "\x1b\x1b[1;35m    \x1b\x1b[36m欧罗巴联赛      5   \x1b\x1b[m\x0d" +
+        "\x1b\x1b[1;36m    \x1b\x1b[33m降级区   18 19 20 \x1b\x1b[m\x0d";
+    FTerm.CurrentWindow.SendConvertedData(about);
 }
 
 var url = "http://www.espnfc.com/barclays-premier-league/23/table";

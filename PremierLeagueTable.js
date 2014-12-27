@@ -57,6 +57,13 @@ function RenderingRule(name, width, pendAction) {
     this.pendAction = pendAction;
 }
 
+function TopPlayer() {
+    this.rank = "";
+    this.name = "";
+    this.club = "";
+    this.data = "";
+}
+
 function XMLHTTPResponse(url,type) {
     var xmlhttp;
     if (type == 0) {
@@ -228,6 +235,39 @@ function parseFromESPNHtml(url) {
     return teamRecords;
 }
 
+function getTopPlayersFromESPNUrl(url, top) {
+    var resource = XMLHTTPResponse(url,0);
+    var board = getSection(resource,"tbody");
+    var trs = getSections(board,"tr");
+
+    /*
+     2014-12-27
+     <tr>
+     <td headers="rank">1 </td>
+     <td headers="player"><a href="http://www.espnfc.com/player/44927/sergio-aguero">Sergio Ag¨¹ero</a></td>
+     <td headers="team"><a href="http://www.espnfc.us/club/manchester-city/382/index">Manchester City</a></td>
+
+     <td headers="goals">14</td>
+
+     </tr>
+     */
+    var topPlayers = [];
+
+    for (var i=0; i < top && i < trs.length; i++) {
+        var details = getSections(peelSections(trs[i].replace(/&nbsp;/g, ""), "a"), "td");
+
+        var topPlayer = new TopPlayer();
+        topPlayer.rank = details[0];
+        topPlayer.name = details[1];
+        topPlayer.club = details[2];
+        topPlayer.data = details[3];
+
+        topPlayers.push(topPlayer);
+    }
+
+    return topPlayers;
+}
+
 function prepend(str) {
     return " " + str;
 }
@@ -243,7 +283,7 @@ function fixStringLength(str, length, pendAction) {
     var witdh = 0;
     for (var i = 0; i < str.length; i++) {
         var charWitdh;
-        if (str.charCodeAt(i) >= 0 && str.charCodeAt(i) < 256) {
+        if (str.charCodeAt(i) >= 0 && str.charCodeAt(i) < 128) {
             charWitdh = 1;
         } else {
             charWitdh = 2;
@@ -263,7 +303,8 @@ function fixStringLength(str, length, pendAction) {
     return str;
 }
 
-function renderTeamColor(rank) {
+function renderTeamColor(data) {
+    var rank = data.rank;
     var light = "";
     if (rank <= 3) {
         light = "\x1b\x1b[1;31m";
@@ -280,21 +321,27 @@ function renderTeamColor(rank) {
     FTerm.CurrentWindow.SendData(light);
 }
 
-function render(teamRecords, renderingRules) {
-    var title = "\x1b\x1b[4m\x1b\x1b[44;1;37mÓ¢¸ñÀ¼×ãÇò³¬¼¶ÁªÈü           ºÏ¼Æ              \x1b\x1b[4m\x1b\x1b[41;37m      Ö÷³¡       \x1b\x1b[4m\x1b\x1b[46;37m      ¿Í³¡      \x1b\x1b[m\x0d" +
-        "\x1b\x1b[4m\x1b\x1b[1;44;37mÅÅÃû Çò¶Ó        »ý·Ö ¾»Ê¤  Èü Ê¤ Æ½ ¸º ½ø Ê§  \x1b\x1b[4m\x1b\x1b[41;37m Ê¤ Æ½ ¸º ½ø Ê§  \x1b\x1b[4m\x1b\x1b[46;37m Ê¤ Æ½ ¸º ½ø Ê§ \x1b\x1b[m\x0d";
-    FTerm.CurrentWindow.SendData(title);
-    for (var j = 0; j < teamRecords.length; j++) {
-        var teamRecord = teamRecords[j];
-        renderTeamColor(teamRecord.rank);
+function renderData(datas, renderingRules, preRowAction) {
+    for (var j = 0; j < datas.length; j++) {
+        var data = datas[j];
+        if (preRowAction != null) {
+            preRowAction(data);
+        }
         var line = "";
         for (var i = 0; i < renderingRules.length; i++) {
             var renderingRule = renderingRules[i];
-            line += fixStringLength(teamRecord[renderingRule.name], renderingRule.width, renderingRule.pendAction);
+            line += fixStringLength(data[renderingRule.name], renderingRule.width, renderingRule.pendAction);
         }
         line += "\x1b\x1b[m\x0d";
         FTerm.CurrentWindow.SendData(line);
     }
+}
+
+function renderTable(teamRecords, renderingRules) {
+    var title = "\x1b\x1b[4m\x1b\x1b[44;1;37mÓ¢¸ñÀ¼×ãÇò³¬¼¶ÁªÈü           ºÏ¼Æ              \x1b\x1b[4m\x1b\x1b[41;37m      Ö÷³¡       \x1b\x1b[4m\x1b\x1b[46;37m      ¿Í³¡      \x1b\x1b[m\x0d" +
+        "\x1b\x1b[4m\x1b\x1b[1;44;37mÅÅÃû Çò¶Ó        »ý·Ö ¾»Ê¤  Èü Ê¤ Æ½ ¸º ½ø Ê§  \x1b\x1b[4m\x1b\x1b[41;37m Ê¤ Æ½ ¸º ½ø Ê§  \x1b\x1b[4m\x1b\x1b[46;37m Ê¤ Æ½ ¸º ½ø Ê§ \x1b\x1b[m\x0d";
+    FTerm.CurrentWindow.SendData(title);
+    renderData(teamRecords, renderingRules, renderTeamColor);
 
     var about = "\x0d" +
         "\x1b\x1b[1m×¢£º\x1b\x1b[31m¹Ú¾üÁªÈü    1 2 3   \x1b\x1b[m\x0d" +
@@ -304,9 +351,40 @@ function render(teamRecords, renderingRules) {
     FTerm.CurrentWindow.SendConvertedData(about);
 }
 
+function renderTopScorers(topScorers, renderingRules) {
+    FTerm.CurrentWindow.SendData("\x0d\x0d");
+
+    //title
+    var title = "\x1b\x1b[37;40;1mÉäÊÖ°ñÇ°Ê®£º\x1b\x1b[m\x0d" +
+        "\x1b\x1b[4m\x1b\x1b[44;1;37mRank    Player                  Club                    Goals                    \x1b\x1b[m\x0d";
+    FTerm.CurrentWindow.SendData(title);
+
+    //data
+    renderData(topScorers, renderingRules, null);
+}
+
+function renderTopAssists(topAssists, renderingRules) {
+    FTerm.CurrentWindow.SendData("\x0d\x0d");
+
+    //title
+    var title = "\x1b\x1b[37;40;1mÖú¹¥°ñÇ°Ê®£º\x1b\x1b[m\x0d" +
+        "\x1b\x1b[4m\x1b\x1b[44;1;37mRank    Player                  Club                    Assists                  \x1b\x1b[m\x0d";
+    FTerm.CurrentWindow.SendData(title);
+
+    //data
+    renderData(topAssists, renderingRules, null);
+}
+
+
+
 var url = "http://www.espnfc.com/barclays-premier-league/23/table";
 //var url = "http://www.espnfc.com/barclays-premier-league/23/table?season=2013";
+var topScorersUrl = "http://www.espnfc.us/barclays-premier-league/23/statistics/scorers";
+var topAssistsUrl = "http://www.espnfc.us/barclays-premier-league/23/statistics/assists";
+
 var teamRecords = parseFromESPNHtml(url);
+var topScorers = getTopPlayersFromESPNUrl(topScorersUrl, 10);
+var topAssists = getTopPlayersFromESPNUrl(topAssistsUrl, 10);
 
 var bigGoals = false;
 for (var i = 0; i < teamRecords.length; i++) {
@@ -317,7 +395,7 @@ for (var i = 0; i < teamRecords.length; i++) {
     }
 }
 
-var renderingRules = [
+var tableRenderingRules = [
     new RenderingRule("rank", 3, append),
     new RenderingRule("team", 14, append),
     new RenderingRule("points", 3, prepend),
@@ -343,4 +421,13 @@ var renderingRules = [
     new RenderingRule("awayGoalsAgainst", 3, prepend)
 ];
 
-render(teamRecords, renderingRules);
+var topPlayerRenderingRules = [
+    new RenderingRule("rank", 8, append),
+    new RenderingRule("name", 24, append),
+    new RenderingRule("club", 24, append),
+    new RenderingRule("data", 10, append)
+]
+
+renderTable(teamRecords, tableRenderingRules);
+renderTopScorers(topScorers, topPlayerRenderingRules);
+renderTopAssists(topAssists, topPlayerRenderingRules);
